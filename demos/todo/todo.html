@@ -23,14 +23,21 @@ var item;
 schemaBuilder.connect().then(function(db) {
   todoDb = db;
   item = db.getSchema().table('Item');
-  var row = item.createRow({
+  var row1 = item.createRow({
     'id': 1,
     'description': 'Get a cup of coffee',
     'deadline': new Date(),
     'done': false
   });
 
-  return db.insertOrReplace().into(item).values([row]).exec();
+  var row2 = item.createRow({
+    'id': 2,
+    'description': 'Get a cup of coffee',
+    'deadline': new Date(),
+    'done': false
+  });
+
+  return db.insertOrReplace().into(item).values([row1, row2]).exec();
 }).then(function() {
   return todoDb.select().from(item).where(item.done.eq(false)).exec();
 }).then(function(results) {
@@ -39,6 +46,16 @@ schemaBuilder.connect().then(function(db) {
     document.body.textContent =
         row['description'] + ' before ' + row['deadline'];
   });
+}).then(function() {
+  var q = todoDb.
+    update(item).
+    set(item.description,lf.bind(0)).
+    where(item.id.eq(lf.bind(1)));
+  return q.bind(['MyFooDesc', 2]).exec();
+}).then(function() {
+  return todoDb.select().from(item).exec();
+}).then(function(res) {
+  return console.log('res', JSON.stringify(res, undefined, 2));
 });
 
     </script>
